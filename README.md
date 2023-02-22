@@ -25,7 +25,7 @@ This keychain needs to be created for each domain, the below is for domain /lvs-
     #        +->* /lvs-test/author/xinyu/KEY/%18%F9%A7CP%F6%BD%1B/ndn/v=1647829957196
  
 To create this keychain, execute the following steps in your command line for each domain using ```ndnsec```
-You can replace the author name to whatever you want, but make sure you update lvs_text in the code to reflect that. 
+You can replace the author name to whatever you want, but make sure you update the code to reflect that. 
 This example is for domain /lvs-test2.
 ```
 ndnsec key-gen /lvs-test2
