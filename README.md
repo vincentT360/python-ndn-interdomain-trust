@@ -6,8 +6,12 @@ There are 2 domains each with its own producer/consumer application
 - /lvs-test uses producer.py and consumer.py
 - /lvs-test2 uses producer2.py and consumer2.py
 
+The are 2 entities that do inter-domain communication, they are:
+1. ```consumer-interdomain-lvstest.py```: This is a consumer application who lives in /lvs-test and wants to fetch data from /lvs-test2
+2. ```producer-interdomain-lvstest2.py```:  This is a producer application who lives in /lvs-test2
+
 ### Creating the keychain
-This keychain needs to be created for each domain, the below is for domain /lvs-test:
+This keychain needs to be created for each domain (so you do this twice), the below is for domain /lvs-test:
 
     # Also, the content of keychain is as follows:
     #   /lvs-test
@@ -43,4 +47,5 @@ ndnsec cert-install lt2AuthorVince.ndncert
 
 ### Running the App
 1. Make sure nfd is started
-2. ```python consumer.py``` or ```python producer.py```
+2. For whatever domain you want to run the entities on execute ```python consumer.py``` or ```python producer.py``` for the corresponding domain.
+    * E.g ```python consumer-interdomain-lvstest.py``` and ```python producer-interdomain-lvstest2.py```

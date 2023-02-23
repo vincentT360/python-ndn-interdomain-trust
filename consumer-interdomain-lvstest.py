@@ -1,3 +1,4 @@
+#Consumer will be in the /lvs-test domain, it expresses interest to fetch data from /lvs-test2
 import os
 import sys
 import logging
@@ -8,7 +9,7 @@ from ndn.app import NDNApp, InterestNack, InterestTimeout, InterestCanceled, Val
 from ndn.app_support.light_versec import compile_lvs, Checker, DEFAULT_USER_FNS, lvs_validator
 
 
-logging.basicConfig(filename="log.txt",
+logging.basicConfig(filename="logInterdomain.txt",
                     format='[{asctime}]{levelname}:{message}',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.DEBUG,
@@ -16,38 +17,39 @@ logging.basicConfig(filename="log.txt",
 
 lvs_text = r'''
 #KEY: "KEY"/_/_/_
-#site: "lvs-test"
+#site: lvs & {lvs: "lvs-test"|"lvs-test2"}
 #article: #site/"article"/author/post/_version & {_version: $eq_type("v=0")} <= #author
 #author: #site/"author"/author/"KEY"/_/admin/_ <= #admin
 #admin: #site/"admin"/admin/#KEY <= #root
 #root: #site/#KEY
 '''
 
+#Modified "#site" so trust schema now follows chain of trust for packets from lvs-test and lvs-test2
+#But it will fail when reaching lvs-test2 trust anchor.
 
 def main():
-    
-    # basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
-    # tpm_path = os.path.join(basedir, 'privKeys')
-    # pib_path = os.path.join(basedir, 'pib.db')
-    # print(basedir, tpm_path, pib_path)
     
     keychain = KeychainSqlite3("/home/vince/.ndn/pib.db", TpmFile("/home/vince/.ndn/ndnsec-key-file"))
 
     trust_anchor = keychain['/lvs-test'].default_key().default_cert()
+
     print(f'Trust anchor name: {Name.to_str(trust_anchor.name)}')
 
     lvs_model = compile_lvs(lvs_text)
     checker = Checker(lvs_model, DEFAULT_USER_FNS)
     app = NDNApp(keychain=keychain)
+
     validator = lvs_validator(checker, app, trust_anchor.data)
+    logging.debug("Done creating validator")
 
     async def fetch_interest(article: str):
         try:
-            name = Name.from_str(f'/lvs-test/article/vincent/{article}')
+            name = Name.from_str(f'/lvs-test2/article/vincent/{article}')
             print(f'Sending Interest {Name.to_str(name)}')
+            logging.debug("Sending Interest")
             data_name, meta_info, content = await app.express_interest(
                 name, must_be_fresh=True, can_be_prefix=True, lifetime=6000,
-                validator=validator)
+                validator=validator) #Need to examine the validator
             print(f'Received Data Name: {Name.to_str(data_name)}')
             print(meta_info)
             print(bytes(content).decode() if content else None)
@@ -62,7 +64,7 @@ def main():
 
     async def ndn_main():
         await fetch_interest('hello')
-        await fetch_interest('world')
+        #await fetch_interest('world')
 
         app.shutdown()
 
