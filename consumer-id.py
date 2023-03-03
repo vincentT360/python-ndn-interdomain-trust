@@ -1,4 +1,6 @@
-#Consumer will be in the /lvs-test domain, it expresses interest to fetch data from /lvs-test2
+#Consumer entity living in /lvs-test domain
+#Expresses interest to fetch data from /lvs-test2
+
 import os
 import sys
 import logging
@@ -12,7 +14,7 @@ from ndn.app_support.light_versec import compile_lvs, Checker, DEFAULT_USER_FNS,
 logging.basicConfig(filename="logInterdomain.txt",
                     format='[{asctime}]{levelname}:{message}',
                     datefmt='%Y-%m-%d %H:%M:%S',
-                    level=logging.DEBUG,
+                    level=logging.INFO,
                     style='{')
 
 lvs_text = r'''
@@ -21,11 +23,12 @@ lvs_text = r'''
 #article: #site/"article"/author/post/_version & {_version: $eq_type("v=0")} <= #author
 #author: #site/"author"/author/"KEY"/_/admin/_ <= #admin
 #admin: #site/"admin"/admin/#KEY <= #root
+#por: "lvs-test2"/"KEY"/_/"x07nx08x08lvs-test"/_ <= #root
 #root: #site/#KEY
 '''
 
 #Modified "#site" so trust schema now follows chain of trust for packets from lvs-test and lvs-test2
-#But it will fail when reaching lvs-test2 trust anchor.
+#But it will fail when reaching lvs-test2 trust anchor because that trust anchor differs from ours.
 
 def main():
     

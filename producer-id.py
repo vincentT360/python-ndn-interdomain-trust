@@ -1,3 +1,6 @@
+#Producer entity living in /lvs-test2 domain
+#Produces data to be fetched
+
 import os
 import sys
 import logging
@@ -24,9 +27,7 @@ lvs_text = r'''
 
 
 def main():
-    basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
-    tpm_path = os.path.join(basedir, 'privKeys')
-    pib_path = os.path.join(basedir, 'pib.db')
+
     keychain = KeychainSqlite3("/home/vince/.ndn/pib.db", TpmFile("/home/vince/.ndn/ndnsec-key-file"))
 
     trust_anchor = keychain['/lvs-test2'].default_key().default_cert()

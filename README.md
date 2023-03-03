@@ -2,13 +2,15 @@
 
 ### Overview
 
-There are 2 domains each with its own producer/consumer application
-- /lvs-test uses producer.py and consumer.py
-- /lvs-test2 uses producer2.py and consumer2.py
+There are 2 domains
+- /lvs-test
+- /lvs-test2
 
-The are 2 entities that do inter-domain communication, they are:
-1. ```consumer-interdomain-lvstest.py```: This is a consumer application who lives in /lvs-test and wants to fetch data from /lvs-test2
-2. ```producer-interdomain-lvstest2.py```:  This is a producer application who lives in /lvs-test2
+Entity breakdown
+1. ```consumer.py``` and ```producer.py```: Simple consumer/producer entities that do communication within /lvs-test domain. This does intradomain communication.
+2. ```consumer-id.py``` and ```producer-id.py```: This is a consumer application who lives in /lvs-test and wants to fetch data from a producer in /lvs-test2. This does interdomain data consumption.
+3. ```controller-c.py``` and ```controller-p.py```: This is a controller entity (split into its consuming/producing parts) that lives in /lvs-test domain.
+4. ```controller2-p.py```: This is a controller entity that lives in the /lvs-test2 domain.
 
 ### Creating the keychain
 This keychain needs to be created for each domain (so you do this twice), the below is for domain /lvs-test:
