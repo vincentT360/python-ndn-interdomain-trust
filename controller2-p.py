@@ -20,13 +20,19 @@ def main():
     keychain = KeychainSqlite3("/home/vince/.ndn/pib.db", TpmFile("/home/vince/.ndn/ndnsec-key-file"))
 
     #Get trust anchor key
-    trust_anchor = keychain['/lvs-test2'].default_key()
+    trust_anchor = keychain['/lvs-test2'].default_key().default_cert()
     
-    print(f'Trust anchor name: {Name.to_str(trust_anchor.name)}')
+    print(f'Serving trust anchor name: {Name.to_str(trust_anchor.name)}')
     
     app = NDNApp(keychain=keychain)
 
-    @app.route(trust_anchor.name)
+    #@app.route(trust_anchor.name)
+    '''
+    For some reason, I have to use this /lvs-test2/KEY/ specifically because the network wont work with can_be_prefix on trust_anchor.name
+    As controller of /lvs-test doesn't know the full TA details of /lvs-test2, I tried using can_be_prefix to fetch it with part of the name
+    But it did not work, so I resorted to this
+    '''
+    @app.route('/lvs-test2/KEY/')
     def on_interest(name, param, _app_param):
         print(f'>> I: {Name.to_str(name)}, {param}')
         app.put_raw_packet(trust_anchor.data)

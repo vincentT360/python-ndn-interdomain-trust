@@ -23,12 +23,17 @@ lvs_text = r'''
 #article: #site/"article"/author/post/_version & {_version: $eq_type("v=0")} <= #author
 #author: #site/"author"/author/"KEY"/_/admin/_ <= #admin
 #admin: #site/"admin"/admin/#KEY <= #root
-#por: "lvs-test2"/"KEY"/_/"x07nx08x08lvs-test"/_ <= #root
+#PoR: "lvs-test2"/"KEY"/_/tlvdomain/_ & {tlvdomain: $check_PoR_domain(tlvdomain)} <= #root
 #root: #site/#KEY
 '''
 
+def check_PoR_domain(component, pattern):
+        #This function makes sure the signer of the PoR is something allowed per the trust schema
+        res = Component.to_str(component) == "x07nx08x08lvs-test" #Temp until we figure out what TLV encoding looks like
+        return res
+
 #Modified "#site" so trust schema now follows chain of trust for packets from lvs-test and lvs-test2
-#But it will fail when reaching lvs-test2 trust anchor because that trust anchor differs from ours.
+#Added PoR rule, hard coded lvs-test2 because that is the naming convention for this domain's PoR. Added custom function to check TLV encoding.
 
 def main():
     
@@ -39,7 +44,10 @@ def main():
     print(f'Trust anchor name: {Name.to_str(trust_anchor.name)}')
 
     lvs_model = compile_lvs(lvs_text)
-    checker = Checker(lvs_model, DEFAULT_USER_FNS)
+
+    user_fns = dict(DEFAULT_USER_FNS)
+    user_fns["$check_PoR_domain"] = check_PoR_domain
+    checker = Checker(lvs_model, user_fns)
     app = NDNApp(keychain=keychain)
 
     validator = lvs_validator(checker, app, trust_anchor.data)
@@ -52,7 +60,7 @@ def main():
             logging.debug("Sending Interest")
             data_name, meta_info, content = await app.express_interest(
                 name, must_be_fresh=True, can_be_prefix=True, lifetime=6000,
-                validator=validator) #Need to examine the validator
+                validator=validator)
             print(f'Received Data Name: {Name.to_str(data_name)}')
             print(meta_info)
             print(bytes(content).decode() if content else None)
