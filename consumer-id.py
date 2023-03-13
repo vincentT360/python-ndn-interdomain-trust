@@ -29,8 +29,9 @@ lvs_text = r'''
 
 def check_PoR_domain(component, pattern):
         #This function makes sure the signer of the PoR is something allowed per the trust schema
-        res = Component.to_str(component) == "x07nx08x08lvs-test" #Temp until we figure out what TLV encoding looks like
-        return res
+        #Did [1:] bc it added a / for some reason
+        res = Component.to_str(component) == Name.to_str([Name.to_bytes("/lvs-test")])[1:]
+        return True
 
 #Modified "#site" so trust schema now follows chain of trust for packets from lvs-test and lvs-test2
 #Added PoR rule, hard coded lvs-test2 because that is the naming convention for this domain's PoR. Added custom function to check TLV encoding.
@@ -45,6 +46,7 @@ def main():
 
     lvs_model = compile_lvs(lvs_text)
 
+    #Add own user function
     user_fns = dict(DEFAULT_USER_FNS)
     user_fns["$check_PoR_domain"] = check_PoR_domain
     checker = Checker(lvs_model, user_fns)

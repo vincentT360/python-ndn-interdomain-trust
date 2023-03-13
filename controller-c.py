@@ -1,27 +1,11 @@
 #Controller consumer entity living in /lvs-test domain
 #It handles PoR creation
 
-"""
-Goals
-
-1. Have controller 1 authenticate controller 2
-- I think done out of band?
-
-2. Have controller 1 fetch trust anchor for domain 2 from controller 2
-- Controller 1 expresses an interest
-
-3. Have controller 1 sign it and store it as PoR
-
-"""
-
-#Consumer entity living in /lvs-test domain
-#Expresses interest to fetch data from /lvs-test2
-
 import os
 import sys
 import logging
 from ndn.utils import timestamp
-from ndn.encoding import Name, Component, InterestParam
+from ndn.encoding import FormalName, BinaryStr, SignatureType, Name, parse_data, SignaturePtrs
 from ndn.security import TpmFile, KeychainSqlite3
 from ndn.app import NDNApp, InterestNack, InterestTimeout, InterestCanceled, ValidationFailure
 from ndn.app_support.light_versec import compile_lvs, Checker, DEFAULT_USER_FNS, lvs_validator
@@ -38,6 +22,7 @@ app = NDNApp()
 def main():
     
     keychain = KeychainSqlite3("/home/vince/.ndn/pib.db", TpmFile("/home/vince/.ndn/ndnsec-key-file"))
+    trust_anchor = keychain['/lvs-test'].default_key()
 
     app = NDNApp()
 
@@ -45,9 +30,8 @@ def main():
         try:
             print(f'Sending Interest {anchor}')
             logging.debug("Sending Interest")
-            data_name, meta_info, content = await app.express_interest(
+            data_name, _, key_bits = await app.express_interest(
                 name=anchor, must_be_fresh=True, can_be_prefix=True)
-            print(f'Got data with name: {Name.to_str(data_name)}')
             return data_name
         except InterestNack as e:
             print(f'Nacked with reason={e.reason}')
@@ -59,16 +43,39 @@ def main():
             print(f'Data failed to validate')
 
     async def ndn_main():
-        #Fetch controller 2's trust anchor
-        #data_name is the name of its trust anchor
-        data_name = await fetch_trust_anchor('/lvs-test2/KEY/')
-        print("Other trust anchor: ", Name.to_str(data_name))
-
-        #After fetching, figure out how to build the PoR name, sign it, and store it into the keychain
-        #Paper has the naming format
-        
+        await generate_PoR()
 
         app.shutdown()
+    
+    async def generate_PoR():
+        local_domain = '/lvs-test'
+        foreign_domain = '/lvs-test2'
+
+        #Fetch controller 2's trust anchor
+        #data_name is the cert name of the foreign trust anchor contains domain and keyid which we need /domain/key/key_id/...
+        #key_bits is the public key of the foreign trust anchor
+        data_name = await fetch_trust_anchor(f'{foreign_domain}/KEY/')
+        print("Fetched", Name.to_str(data_name))
+
+        data_name = Name.to_str(data_name).split('/')
+
+        foreign_domain_key_id = data_name[data_name.index('KEY')+1]
+        foreign_domain_key_name = f'{foreign_domain}/KEY/{foreign_domain_key_id}'
+
+        #Check if identity or key already exists, if not create them.
+        if foreign_domain in keychain:
+            print("Identity already exists")
+            if foreign_domain_key_name in keychain[foreign_domain]:
+                print("Key already exists")
+            else:
+                keychain.new_key(foreign_domain, key_id=foreign_domain_key_id)
+        else:
+            keychain.new_identity(foreign_domain)
+            keychain.new_key(foreign_domain, key_id=foreign_domain_key_id)
+
+        #Now create the PoR, it needs various components to sign
+        #PoR: foreign_domain_key_name/local_domain/version <-(signed by) my trust anchor
+        keychain.sign_PoR(foreign_domain, foreign_domain_key_name, Name.to_str(trust_anchor.name), local_domain)
 
     app.run_forever(ndn_main())
 

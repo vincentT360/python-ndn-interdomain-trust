@@ -47,7 +47,16 @@ ndnsec cert-gen -s /lvs-test2/admin/ndn -i ndn -r lt2AuthorVince.csr > lt2Author
 ndnsec cert-install lt2AuthorVince.ndncert
 ```
 
-### Running the App
+### Running the Interdomain Example
 1. Make sure nfd is started
-2. For whatever domain you want to run the entities on execute ```python consumer.py``` or ```python producer.py``` for the corresponding domain.
-    * E.g ```python consumer-interdomain-lvstest.py``` and ```python producer-interdomain-lvstest2.py```
+2. First, you need to generate the PoR, run ```controller-c.py``` and ```controller2-p.py```
+    * This makes the controller of the /lvs-test domain fetch the trust anchor of the /lvs-test2 domain
+    * After fetching, it will also create and store the PoR certificate
+    * Note: When creating a PoR, you will need to modify  ```controller-p.py``` line 22 to update to the new PoR
+3. Now, you can run the consumer and producer apps, run ```consumer-id.py``` and ```producer-id.py``` and ```controller-p.py```
+    * This is a consumer living in /lvs-test who will fetch data from /lvs-test2 while using the PoR to validate
+    * The consumer application needs to fetch the PoR from the controller, hence we run ```controller-p.py``` too.
+
+Note: Prefix interest does not seem to work, so when a PoR is created, you need to change the version number on line 136 of cascade_checker when fetching it
+
+Note: cascade_validator, keychainsqlite3, security_v2, validator are designed to replace the existing versions in the python-ndn library in order for this to work

@@ -16,12 +16,10 @@ logging.basicConfig(format='[{asctime}]{levelname}:{message}',
                     style='{')
 
 def main():
-    #To generate a test PoR: ndnsec cert-gen -s /lvs-test -i <tlv-encoded /lvs-test> -r PoRtest.csr > PoRtest.ndncert
-
     keychain = KeychainSqlite3("/home/vince/.ndn/pib.db", TpmFile("/home/vince/.ndn/ndnsec-key-file"))
 
     #Fetch PoR from keychain
-    proof_of_domain_recognition = keychain['/lvs-test2'].default_key()[f'/lvs-test2/KEY/%D9%A1%2A%F3V%3D%25%F7/x07nx08x08lvs-test/v=1677798271821']
+    proof_of_domain_recognition = keychain['/lvs-test2'].default_key()[f'/lvs-test2/KEY/%D9%A1%2A%F3V%3D%25%F7/7=%08%08lvs-test/v=1678663087543']
     
     print(f'PoR name: {Name.to_str(proof_of_domain_recognition.name)}')
 

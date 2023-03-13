@@ -5,10 +5,11 @@ import os
 import sys
 import logging
 from ndn.utils import timestamp
-from ndn.encoding import Name, Component
+from ndn.encoding import FormalName, BinaryStr, SignatureType, Name, parse_data, SignaturePtrs
 from ndn.security import TpmFile, KeychainSqlite3
 from ndn.app import NDNApp
 from ndn.app_support.light_versec import compile_lvs, Checker, DEFAULT_USER_FNS
+from Cryptodome.PublicKey import ECC, RSA
 
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',
@@ -21,9 +22,15 @@ def main():
 
     #Get trust anchor key
     trust_anchor = keychain['/lvs-test2'].default_key().default_cert()
-    
+
     print(f'Serving trust anchor name: {Name.to_str(trust_anchor.name)}')
-    
+    #print("Trust anchor identity", Name.to_str(trust_anchor.identity))
+    #print("Trust anchor key bits", trust_anchor.key_bits)
+    #print("Trust anchor certificate data", trust_anchor.default_cert().data)
+    name, _, key_bits, _= parse_data(trust_anchor.data)
+
+    #print(keychain['/lvs-test2'].default_key().key_bits == bytes(key_bits))
+
     app = NDNApp(keychain=keychain)
 
     #@app.route(trust_anchor.name)
@@ -38,7 +45,7 @@ def main():
         app.put_raw_packet(trust_anchor.data)
         print(f'<< D: {Name.to_str(trust_anchor.name)}')
         print('')
-
+    
     print('Start serving ...')
     app.run_forever()
     
