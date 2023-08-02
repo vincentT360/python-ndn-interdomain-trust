@@ -104,14 +104,15 @@ class CascadeChecker:
         #2. identity <- local ta: Compare against my hardcoded ta
         #3. identity <- idenity: Fetch the other identity
 
-        #This is used to test inter-domain
+        #This is used to test inter-domain:
         #Bc lvs-test domain trust anchor is /lvs-test it fails to recognize /lvs-test2 trust anchor
-        #This is just a cheap way to accept the packet signed by /lvs-test2 trust anchor.
+        #This is just a testing way to accept the packet signed by /lvs-test2 trust anchor.
         #Meaning that since this returns True, the whole chain is accepted and so does the packet. We probbaly need to do PoR stuff here.
         #if Name.to_str(cert_name) == "/lvs-test2/KEY/%D9%A1%2A%F3V%3D%25%F7/self/v=1677033715766":
         #    print("--------------------------------------")
         #    return True
-
+        
+        #Proper implementation:
         #1. Detect that the certificate signing this key is a trust anchor of another domain that we accept according to trust schema
         # identity <- trust b anchor
         root_of_trust = self.lvs_checker.root_of_trust()
