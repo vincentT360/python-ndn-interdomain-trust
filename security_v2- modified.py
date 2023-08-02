@@ -123,7 +123,7 @@ def sign_req(key_name, pub_key, signer) -> Tuple[FormalName, VarBinaryStr]:
     return new_cert(key_name, SIGN_REQ_COMPONENT, pub_key, signer,
                     datetime.utcnow(), end_time)
 
-#[CS 217b Project]
+#[Project code]:
 def sign_req_PoR(key_name, pub_key, signer, domain_name) -> Tuple[FormalName, VarBinaryStr]:
     start_time = datetime.utcnow()
     end_time = start_time + timedelta(days=10)

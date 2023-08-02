@@ -103,7 +103,7 @@ def lvs_validator(checker: Checker, app: NDNApp, trust_anchor: BinaryStr,
     sanity_check()
     #We add the roots of trust to be passed along to cascade checker.
     #So we modify CascadeChecker construction function to take in root_of_trust
-    root_of_trust = checker.root_of_trust() #[CS 217b Project]
+    root_of_trust = checker.root_of_trust() #[Project code]:
     cas_checker = CascadeChecker(app, trust_anchor, storage, checker)
     ret = union_checker(validate_name, cas_checker)
     cas_checker.next_level = ret

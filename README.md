@@ -1,6 +1,8 @@
-# CS217b-Intertrust
+# Interdomain Trust
 
 ### Overview
+
+Background: https://dl.acm.org/doi/abs/10.1145/3517212.3559489
 
 There are 2 domains
 - /lvs-test
@@ -60,3 +62,8 @@ ndnsec cert-install lt2AuthorVince.ndncert
 Note: Prefix interest does not seem to work, so when a PoR is created, you need to change the version number on line 136 of cascade_checker when fetching it
 
 Note: cascade_validator, keychainsqlite3, security_v2, validator are designed to replace the existing versions in the python-ndn library in order for this to work
+
+### Contributions
+1. Code for all the consumer and producer files.
+2. Modification of the cascade_validator, validator, keychainsqlite, and security_v2 files to support functionality for PoR certificate creation, signing, validating, fetching, and checking.
+3. Demonstration of successful instance of cross domain packet consumption using proposed changes.

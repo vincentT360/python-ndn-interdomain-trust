@@ -714,7 +714,7 @@ class KeychainSqlite3(Keychain):
             identity.set_default_key(key_name)
         return identity[key_name]
     
-    #[CS 217b Project]
+    #[Project code]:
     def sign_PoR(self, id_name: NonStrictName, key_name: NonStrictName, ta_key_name: NonStrictName, domain_name: NonStrictName) -> Key:
         #To sign a PoR we need to find the correct identity, the key to be signed, our trust anchor, and our domain name
 

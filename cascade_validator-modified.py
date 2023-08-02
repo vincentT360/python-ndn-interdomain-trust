@@ -98,6 +98,7 @@ class CascadeChecker:
         logging.debug(f'Verifying {Name.to_str(name)} <- {Name.to_str(cert_name)} ...')
         print(f'[Cascade-validator]: Verifying {Name.to_str(name)} <- {Name.to_str(cert_name)}')
 
+        #[Project code]:
         #Different validate scenarios
         #1. identity <- foreign ta: Fetch PoR
         #2. identity <- local ta: Compare against my hardcoded ta
@@ -113,7 +114,6 @@ class CascadeChecker:
 
         #1. Detect that the certificate signing this key is a trust anchor of another domain that we accept according to trust schema
         # identity <- trust b anchor
-        #[CS 217b Project]
         root_of_trust = self.lvs_checker.root_of_trust()
         ta_matches = sum((m[0] for m in self.lvs_checker.match(cert_name)), start=[])
         if cert_name != self.anchor_name and root_of_trust.issubset(ta_matches):
